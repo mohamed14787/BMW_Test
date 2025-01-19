@@ -33,12 +33,10 @@ function App() {
 
   const handleClick = () => {
     const term = searchTerm.current.value;
-    console.log(searchTerm);
     fetch(`http://localhost:5005/cars/search/${term}`)
       .then((res) => res.json())
       .then((data) => {
         setFilteredData(data);
-        console.log("a7a");
       });
   };
 

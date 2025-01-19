@@ -22,7 +22,8 @@ export default function Grid_(props) {
   const filterType = useRef("startsWith");
   const [lastDeleted, setLastDeleted] = useState(null);
 
-  const handleFilterClick = () => {
+  const handleFilterClick = (props) => {
+    const field = props;
     let filterValue = filterInputRef.current.value;
     const curremtFilterType = filterType.current.value;
     if (!filterValue || filterValue === "") {
@@ -30,7 +31,7 @@ export default function Grid_(props) {
     }
 
     fetch(
-      `http://localhost:5005/cars/filter/${curremtFilterType}/${filterValue}`
+      `http://localhost:5005/cars/filter/${field}/${curremtFilterType}/${filterValue}`
     )
       .then((res) => res.json())
       .then((data) => {
@@ -55,7 +56,6 @@ export default function Grid_(props) {
 
   const handleUndo = () => {
     if (lastDeleted) {
-      console.log(lastDeleted);
       axios.post("http://localhost:5005/cars/add", lastDeleted).then((res) => {
         console.log("Record added successfully!");
         setRowData([...rowData, lastDeleted]);
@@ -80,7 +80,7 @@ export default function Grid_(props) {
     );
   };
 
-  const filterModel = () => {
+  const filterModel = (props) => {
     return (
       <div
         style={{
@@ -108,7 +108,7 @@ export default function Grid_(props) {
             paddingRight: "10px",
           }}
         >
-          <button onClick={handleFilterClick}>Apply filter</button>
+          <button onClick={() => handleFilterClick(props)}>Apply filter</button>
           <button onClick={handleCanceSearch}>Cancel</button>
         </div>
       </div>
@@ -116,21 +116,65 @@ export default function Grid_(props) {
   };
 
   const columnDefs = [
-    { headerName: "BRAND", field: "Brand" },
-    { headerName: "Model", field: "Model", filter: filterModel },
-    { headerName: "Accel. (sec)", field: "AccelSec" },
-    { headerName: "Top Speed (km/h)", field: "TopSpeed_KmH" },
-    { headerName: "Range (km)", field: "Range_Km" },
-    { headerName: "Efficiency (Wh/Km)", field: "Efficiency_WhKm" },
-    { headerName: "Fast Charge (km/h)", field: "FastCharge_KmH" },
-    { headerName: "Rapid Charge", field: "RapidCharge" },
-    { headerName: "Power Train", field: "PowerTrain" },
-    { headerName: "Plug Type", field: "PlugType" },
-    { headerName: "Body Style", field: "BodyStyle" },
-    { headerName: "Segment", field: "Segment" },
-    { headerName: "Seats", field: "Seats" },
-    { headerName: "Price (EUR)", field: "PriceEuro" },
-    { headerName: "Date", field: "Date" },
+    { headerName: "BRAND", field: "Brand", filter: () => filterModel("Brand") },
+    { headerName: "Model", field: "Model", filter: () => filterModel("Model") },
+    {
+      headerName: "Accel. (sec)",
+      field: "AccelSec",
+      filter: () => filterModel("AccelSec"),
+    },
+    {
+      headerName: "Top Speed (km/h)",
+      field: "TopSpeed_KmH",
+      filter: () => filterModel("TopSpeed_KmH"),
+    },
+    {
+      headerName: "Range (km)",
+      field: "Range_Km",
+      filter: () => filterModel("Range_Km"),
+    },
+    {
+      headerName: "Efficiency (Wh/Km)",
+      field: "Efficiency_WhKm",
+      filter: () => filterModel("Efficiency_WhKm"),
+    },
+    {
+      headerName: "Fast Charge (km/h)",
+      field: "FastCharge_KmH",
+      filter: () => filterModel("FastCharge_KmH"),
+    },
+    {
+      headerName: "Rapid Charge",
+      field: "RapidCharge",
+      filter: () => filterModel("RapidCharge"),
+    },
+    {
+      headerName: "Power Train",
+      field: "PowerTrain",
+      filter: () => filterModel("PowerTrain"),
+    },
+    {
+      headerName: "Plug Type",
+      field: "PlugType",
+      filter: () => filterModel("PlugType"),
+    },
+    {
+      headerName: "Body Style",
+      field: "BodyStyle",
+      filter: () => filterModel("BodyStyle"),
+    },
+    {
+      headerName: "Segment",
+      field: "Segment",
+      filter: () => filterModel("Segment"),
+    },
+    { headerName: "Seats", field: "Seats", filter: () => filterModel("Seats") },
+    {
+      headerName: "Price (EUR)",
+      field: "PriceEuro",
+      filter: () => filterModel("PriceEuro"),
+    },
+    { headerName: "Date", field: "Date", filter: () => filterModel("Date") },
     {
       headerName: "Action",
       cellRenderer: ActtionComponent,

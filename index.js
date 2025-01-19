@@ -63,26 +63,6 @@ app.get("/cars", async (req, res) => {
   }
 });
 
-app.get("/cars/filter", async (req, res) => {
-  try {
-    const filters = {};
-    for (const param in req.query) {
-      const value = req.query[param];
-      if (param.endsWith("_equals")) {
-        const field = param.replace("_equals", "");
-        filters[field] = value;
-      } else if (param.endsWith("_contains")) {
-        const field = param.replace("_contains", "");
-        filters[field] = { $regex: value, $options: "i" };
-      }
-    }
-    const cars = await collection.find(filters).toArray();
-    res.json(cars);
-  } catch (err) {
-    res.status(500).send("Server error");
-  }
-});
-
 app.delete("/cars/:id", async (req, res) => {
   const { id } = req.params;
   try {
@@ -111,9 +91,8 @@ app.get("/cars/search/:Brand", async (req, res) => {
   }
 });
 
-app.get("/cars/filter/:operator/:value", async (req, res) => {
-  const { operator, value } = req.params;
-  const field = "Model";
+app.get("/cars/filter/:field/:operator/:value", async (req, res) => {
+  const { field, operator, value } = req.params;
 
   let filter = {};
   switch (operator) {
@@ -121,7 +100,7 @@ app.get("/cars/filter/:operator/:value", async (req, res) => {
       filter[field] = { $regex: value, $options: "i" };
       break;
     case "equals":
-      filter[field] = value;
+      filter[field] = { $eq: value };
       break;
     case "startsWith":
       filter[field] = { $regex: `^${value}`, $options: "i" };
@@ -131,22 +110,15 @@ app.get("/cars/filter/:operator/:value", async (req, res) => {
       break;
 
     case "isEmpty":
-      filter[field] = "";
+      filter[field] = { $exists: false };
       break;
     default:
       return res.status(400).send(`Inv "${operator}"`);
   }
 
   try {
-    console.log(filter);
-    if (filter[field] == "") {
-      const all = await collection.find({}).toArray();
-      console.log(all);
-      res.json(all);
-    } else {
-      const cars = await collection.find(filter).toArray();
-      res.json(cars);
-    }
+    const cars = await collection.find(filter).toArray();
+    res.json(cars);
   } catch (err) {
     res.status(500).send("Server error");
   }
@@ -154,7 +126,6 @@ app.get("/cars/filter/:operator/:value", async (req, res) => {
 
 app.post("/cars/add", async (req, res) => {
   const car = req.body;
-  console.log(car);
   try {
     const result = await collection.insertOne(car);
     res.json({ _id: result.insertedId, ...car });
